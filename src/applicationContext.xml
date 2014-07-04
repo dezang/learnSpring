@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmls="http://www.springframework.org/schema/beans"
+	xmls:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+											http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+	
+	<bean id="connectionMaker" class="dezang.user.DconnectionMaker" />
+	
+	<bean id="userDao" class="dezang.user.dao.UserDao">
+		<property name="connectionMaker" ref="connectionMaker"/>
+	</bean>
+</beans>
