@@ -1,4 +1,4 @@
-package dezang.user.dao;
+package dezang.inactive;
 
 import java.sql.Connection;
 import java.sql.SQLException;

@@ -1,10 +1,11 @@
-package dezang.user.dao;
+package dezang.inactive;
 
 import java.sql.SQLException;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
 
+import dezang.user.dao.UserDao;
 import dezang.user.domain.User;
 
 public class UserDaoConnectionCountingTest {

@@ -63,4 +63,93 @@ DB를 사용해 데이터를 조회하거나 조작하는 기능을 전담하도
 ##### 의존관계 검색(Dependency Lookup)
 의존관계를 맺는 방법이 외부로부터의 주입이 아니라 스스로 검색을 이용한다. 의존관계 검색은 자신이 필요로 하는 의존 오브젝트를 능동적으로 찾는다.
 
-의존관계 검색과 의존관계 주입을 적용할 때 중요한 차이점이 하나는 의존관계 검색 방식에서는 검색하는 오브젝트는 자신이 스프링의 빈일 필요가 없다는 점이다. 반면에 의존관계 주입에서는 오브젝트 사이에 DI가 적용되려면 둘 다 반드시 컨테이너가 만드는 빈 오브젝트여야 한다. 
+의존관계 검색과 의존관계 주입을 적용할 때 중요한 차이점이 하나는 의존관계 검색 방식에서는 검색하는 오브젝트는 자신이 스프링의 빈일 필요가 없다는 점이다. 반면에 의존관계 주입에서는 오브젝트 사이에 DI가 적용되려면 둘 다 반드시 컨테이너가 만드는 빈 오브젝트여야 한다.
+
+##### XML을 이용한 설정의 장점
+- XML은 단순한 텍스트 파일이기 때문에 다루기 쉽다.
+- 쉽게 이해할 수 있으며 컴파일 같은 별도의 빌드 작업이 없다.
+- 환경이 달라져서 오브젝트의 관계가 바뀌는 경우에도 빠르게 변경사항을 반영할 수 있다.
+- 스키마나 DTD를 이용해서 정해진 포맷에 따라 적성됐는지 확인이 용이하다.
+
+##### Application Context Using XML
+`GenericXmlApplicationContext`를 사용한다. 생성자 파라미터로 XML파일의 클래스패스를 지정해 한다. XML 설정파일은 클래스 패스 최상단에 두면 편하다. XML 설정파일의 이름은 관례를 따라 `applictionContext.xml`로 만든다. 간단한 Dao빈을 생성하는 XML파일은 다음과 같다.
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+	
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.SimpleDriverDataSource">
+		<property name="driverClass" value="com.mysql.jdbc.Driver"/>
+		<property name="url" value="jdbc:mysql://localhost:3306/test"/>
+		<property name="username" value="userId"/>
+		<property name="password" value="userPass"/>
+	</bean>
+	
+	<bean id="userDao" class="dezang.user.dao.UserDao">
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+</beans>
+```
+
+### 테스트
+##### 단위테스트
+단위테스트에서 단위는 그 크기와 범위가 어느 정도인지 딱 정해진 것은 아니다. 크게는 사용자 관리 기능을 모두 통틀어서 하나의 단위로 볼 수도 있고, 작게 보자면 메소드 하나만 가지고 하나의 단위라고 생각할 수도 있다. 충분히 하나의 관심에 집중해서 효율적으로 테스트할 만한 범위라고 보면 된다.
+
+> 일반적으로 단위는 작을수록 좋다.
+
+- 단위테스트는 항상 일관성 있는 결과가 보장돼야 한다는 점을 잊지 말라.
+- 테스트를 실행하는 순서를 바꿔도 동일한 결과가 보장되도록 만들어야 한다.
+
+##### 테스트 메소드의 조건
+`@Test` 어노테이션이 붙어있고 `public` 접근자가 있으며, 리턴 값이 `void`혀이고 파라미터가 없어야 한다.
+
+##### 예외상황 테스트
+```java
+@Test(expected=EmptyResultDataAccessException.class)
+```
+
+- 참조 171p 
+
+##### 테스트코드 작성시 주의사항
+- 개발자가 테스트를 직접 만들 때 자주 하는 실수는 성공하는 케이스만 골라서 만드는 것이다. 테스트를 작성할 때도 문제가 될 만한 상황이나, 입력 값 등은 피해서 코드를 만드는 습성이 있다.
+
+> 항상 네거티브 테스트를 먼저 만들라
+> \- 로드 존슨(스프링 창시자) -
+
+- 각 테스트 코드를 실행할 때마다 테스트 클래스의 오브젝트를 새로 만든다.
+##### TDD(Test Driven Development)
+TDD는 테스트 주도 개발이라고 한다. 만들고자 하는 기능의 내용을 담고 있으면서 만들어진 코드를 검증도 해줄 수 있도록 테스트 코드를 먼저 만들고, 세트스틑 성공하게 해주는 코드를 작성하는 개발 방법이다.
+
+- 참조 176p
+
+##### 픽스처
+테스트를 수행하는 데 필요한 정보나 오브젝트. 일반적으로 픽스처는 여러 테스트에서 반복적으로 사용되기 때문에 `@Before` 메소드를 이용해 생성해두는 것이 편리하다.
+
+##### 스프링 테스트 컨텍스트 프레임워크 적용
+- org.springframework.test-3.1.4.RELEASE.jar 라이브러리 추가
+
+```java
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations="/applicationContext.xml")
+public class Test {
+	@Autowired private ApplicationContext context;
+    
+    @Before
+    public void setUp() {
+    	// here write setup code...
+    }
+    
+    @Test
+    public void testMethod() {
+    	// here write test code...
+    }
+}
+```
+
+- 참조 185p
+
+##### 테스트에 DI하는 세 가지 방법
+- 참조 192p
